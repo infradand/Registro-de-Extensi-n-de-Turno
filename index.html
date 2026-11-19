@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SINFRA · Registro de Extensión de Turno</title>
+<style>
+:root{
+  --dorado:#F4AA00; --naranjo:#E55302; --turquesa:#0098AA; --rojo:#C13832;
+  --pizarra:#36424A; --petroleo:#106470; --arena:#C4C1A0;
+  --fondo:#F5F4EF; --borde:#DFDDD0; --suave:#6B757C; --blanco:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Arial,Helvetica,sans-serif;background:var(--fondo);color:var(--pizarra);font-size:14px;line-height:1.4}
+.franja{display:flex;height:6px}
+.franja i{flex:1}
+header{background:var(--blanco);border-bottom:1px solid var(--borde)}
+.cab{max-width:1200px;margin:0 auto;padding:14px 16px 0;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:space-between}
+.marca small{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--naranjo);font-weight:700}
+.marca h1{margin:2px 0 0;font-size:20px;font-weight:700}
+.marca span{font-size:12px;color:var(--suave)}
+.mes{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--suave)}
+nav{max-width:1200px;margin:0 auto;padding:10px 16px 0;display:flex;gap:4px;overflow-x:auto}
+nav button{border:0;background:none;padding:10px 14px;font:inherit;font-weight:600;color:var(--suave);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+nav button.on{color:var(--naranjo);border-bottom-color:var(--naranjo)}
+nav button b{background:var(--dorado);color:var(--pizarra);border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px}
+main{max-width:1200px;margin:0 auto;padding:16px}
+.vista{display:none}.vista.on{display:block}
+.card{background:var(--blanco);border:1px solid var(--borde);border-radius:8px;padding:16px;margin-bottom:14px}
+.card h2{margin:0 0 12px;font-size:14px;display:flex;align-items:center;gap:8px}
+.card h2 em{font-style:normal;background:var(--turquesa);color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.card h2 small{font-weight:400;color:var(--suave)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.grid .x2{grid-column:span 2}
+@media(max-width:560px){.grid .x2{grid-column:auto}}
+label{display:block;font-size:12px;font-weight:600;margin-bottom:4px}
+label i{color:var(--rojo);font-style:normal}
+input,select,textarea{width:100%;padding:8px 9px;border:1px solid var(--borde);border-radius:6px;font:inherit;color:inherit;background:#fff}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--turquesa);outline-offset:0;border-color:var(--turquesa)}
+input.err,select.err{border-color:var(--rojo);background:#FDF3F2}
+.ayuda{font-size:11px;color:var(--suave);margin-top:3px}
+.btn{border:1px solid var(--borde);background:#fff;color:var(--pizarra);padding:8px 14px;border-radius:6px;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{border-color:var(--pizarra)}
+.btn.pri{background:var(--naranjo);border-color:var(--naranjo);color:#fff}
+.btn.pri:hover{background:#C94800}
+.btn.tur{background:var(--turquesa);border-color:var(--turquesa);color:#fff}
+.btn.rojo{color:var(--rojo);border-color:var(--rojo)}
+.btn.mini{padding:4px 8px;font-size:12px}
+.fila{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.trab{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;max-height:230px;overflow:auto;padding:2px}
+.trab label{display:flex;gap:8px;align-items:center;border:1px solid var(--borde);border-radius:6px;padding:7px 9px;margin:0;font-weight:500;cursor:pointer}
+.trab label.sel{border-color:var(--turquesa);background:#E8F6F8}
+.trab input{width:auto}
+.trab small{color:var(--suave);display:block;font-size:11px}
+.resumenForm{background:#FFF7E0;border-left:4px solid var(--dorado);padding:9px 12px;border-radius:4px;font-size:13px;margin-bottom:12px}
+.aviso{background:#FDF3F2;border-left:4px solid var(--rojo);padding:9px 12px;border-radius:4px;font-size:13px;margin-bottom:12px;display:none}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:#fff;border:1px solid var(--borde);border-top:4px solid var(--turquesa);border-radius:8px;padding:12px}
+.kpi:nth-child(1){border-top-color:var(--naranjo)}.kpi:nth-child(2){border-top-color:var(--turquesa)}
+.kpi:nth-child(3){border-top-color:var(--dorado)}.kpi:nth-child(4){border-top-color:var(--rojo)}.kpi:nth-child(5){border-top-color:var(--pizarra)}
+.kpi b{display:block;font-size:24px;line-height:1.1}
+.kpi span{font-size:12px;color:var(--suave)}
+.tw{overflow-x:auto;border:1px solid var(--borde);border-radius:8px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{background:var(--pizarra);color:#fff;text-align:left;padding:8px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+td{padding:7px 8px;border-top:1px solid var(--borde);vertical-align:top}
+tr:hover td{background:#FAF9F4}
+td.n,th.n{text-align:right;white-space:nowrap}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap;border:0;cursor:default}
+.tag.ok{background:#DDF1F3;color:var(--petroleo)}
+.tag.pend{background:#FFEFC2;color:#7A5500}
+.tag.falta{background:#F8DEDC;color:var(--rojo)}
+.tag.rev{background:#FCE3D4;color:#A33C00}
+button.tag{cursor:pointer}
+.vacio{padding:26px;text-align:center;color:var(--suave)}
+.barra{display:grid;grid-template-columns:minmax(120px,210px) 1fr 60px;gap:8px;align-items:center;margin:6px 0;font-size:13px}
+.barra div{background:#EEECE2;border-radius:4px;height:14px;overflow:hidden}
+.barra div i{display:block;height:100%;background:var(--turquesa)}
+.barra.n i{background:var(--naranjo)}.barra.d i{background:var(--dorado)}
+.barra span{text-align:right;font-weight:600}
+.modal{position:fixed;inset:0;background:rgba(54,66,74,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.modal.on{display:flex}
+.modal .card{max-width:480px;width:100%;margin:0;max-height:90vh;overflow:auto}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--pizarra);color:#fff;padding:10px 18px;border-radius:6px;display:none;z-index:30;font-weight:600;max-width:90vw}
+.sep{flex:1}
+#acceso{position:fixed;inset:0;background:var(--fondo);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.acc{max-width:400px;width:100%;margin:0;padding:0;overflow:hidden}
+.acc .in{padding:22px}
+.acc small.m{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--naranjo);font-weight:700}
+.acc h1{margin:2px 0 16px;font-size:20px}
+.acc label{margin-top:10px}
+.acc .btn.pri{width:100%;margin-top:16px;padding:10px}
+.tabs{display:flex;border-bottom:1px solid var(--borde);margin-bottom:6px}
+.tabs button{flex:1;border:0;background:none;padding:9px;font:inherit;font-weight:600;color:var(--suave);border-bottom:3px solid transparent;cursor:pointer}
+.tabs button.on{color:var(--naranjo);border-bottom-color:var(--naranjo)}
+.amsg{font-size:13px;margin-top:12px;padding:9px 12px;border-radius:4px;background:#FDF3F2;border-left:4px solid var(--rojo);display:none}
+.amsg.ok{background:#E8F6F8;border-left-color:var(--turquesa)}
+.combo{position:relative}
+.combo .buscador{margin-bottom:8px;padding-right:44px}
+.abre{position:absolute;right:6px;top:5px;width:32px;height:32px;border:0;background:none;cursor:pointer}
+.abre::after{content:"";position:absolute;left:10px;top:13px;border:6px solid transparent;border-top:7px solid var(--naranjo)}
+.desple{display:none;position:absolute;left:0;right:0;top:46px;background:#fff;border:1px solid var(--borde);border-radius:10px;box-shadow:0 8px 24px rgba(54,66,74,.2);max-height:290px;overflow:auto;z-index:10}
+.combo.on .desple{display:block}
+.desple button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--borde);background:#fff;padding:9px 14px;font:inherit;color:inherit;cursor:pointer}
+.desple button:hover,.desple button:focus{background:#E8F6F8;outline:0}
+.desple button small{display:block;color:var(--suave);font-size:11px}
+.desple button.nuevo{position:sticky;bottom:0;background:#FFF7E0;color:var(--naranjo);font-weight:700;border-bottom:0;border-top:1px solid var(--borde)}
+.desple .nada{padding:10px 14px;color:var(--suave);font-size:13px}
+.elegidos{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chipT{display:inline-flex;align-items:center;gap:8px;background:#E8F6F8;border:1px solid var(--turquesa);border-radius:18px;padding:5px 6px 5px 12px;font-size:13px;font-weight:600}
+.chipT small{font-weight:400;color:var(--suave)}
+.chipT button{border:0;background:var(--turquesa);color:#fff;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:11px;line-height:1;padding:0}
+.sinsel{color:var(--suave);font-size:13px}
+.buscador{height:42px;border-radius:21px;padding-left:42px;font-size:15px;margin-bottom:12px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23E55302' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='7'/%3E%3Cpath d='M16 16l5.5 5.5'/%3E%3C/svg%3E") no-repeat 15px center}
+.mesnav{display:none;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.flecha{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--naranjo);background:#fff;color:var(--naranjo);font-size:24px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0 0 3px;font-family:inherit}
+.flecha:hover{background:var(--naranjo);color:#fff}
+.messel{position:relative}
+.messel select{appearance:none;-webkit-appearance:none;width:auto;min-width:200px;height:40px;padding:0 38px 0 16px;border:1.5px solid var(--borde);border-radius:20px;font-size:16px;font-weight:700;color:var(--pizarra);background:#fff;cursor:pointer;text-align:center;text-align-last:center}
+.messel::after{content:"";position:absolute;right:16px;top:16px;border:5px solid transparent;border-top:6px solid var(--naranjo);pointer-events:none}
+.mesinfo{font-size:13px;color:var(--suave);margin-left:4px}
+.mesinfo b{color:var(--pizarra)}
+.chip{border:1px solid var(--borde);background:#fff;color:var(--pizarra);border-radius:18px;padding:6px 13px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap;font-weight:600}
+.chip small{font-weight:400;opacity:.8;margin-left:4px}
+.chip.on{background:var(--naranjo);border-color:var(--naranjo);color:#fff}
+.usr{font-size:12px;color:var(--suave);display:flex;gap:8px;align-items:center}
+.usr b{color:var(--pizarra);font-size:13px}
+footer{max-width:1200px;margin:0 auto;padding:6px 16px 26px;font-size:11px;color:var(--suave)}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="acceso"><div class="card acc">
+  <div class="franja"><i style="background:#F4AA00"></i><i style="background:#E55302"></i><i style="background:#0098AA"></i><i style="background:#C13832"></i></div>
+  <div class="in">
+    <small class="m">Codelco · División Andina</small>
+    <h1>Registro de Extensión de Turno</h1>
+    <div id="aCarga">Conectando…</div>
+    <form id="aCfg" style="display:none" novalidate>
+      <p class="ayuda">Conexión a la base de datos. Se configura una sola vez en este navegador.</p>
+      <label>URL del proyecto Supabase</label><input id="cUrl" placeholder="https://xxxx.supabase.co">
+      <label>Clave publishable (anon)</label><input id="cKey" placeholder="sb_publishable_…">
+      <button class="btn pri">Guardar conexión</button>
+    </form>
+    <form id="aNombre" style="display:none" novalidate>
+      <p class="ayuda">Registro inicial: tu nombre queda asociado a cada extensión de turno que agregues o modifiques. Se pide una sola vez en este equipo.</p>
+      <label>Nombre</label><input id="aNom" autocomplete="given-name">
+      <label>Apellido</label><input id="aApe" autocomplete="family-name">
+      <button class="btn pri">Entrar</button>
+    </form>
+    <div class="amsg" id="aMsg"></div>
+  </div>
+</div></div>
+<div class="franja"><i style="background:#F4AA00"></i><i style="background:#E55302"></i><i style="background:#0098AA"></i><i style="background:#C13832"></i></div>
+<header>
+  <div class="cab">
+    <div class="marca">
+      <small>Codelco · División Andina</small>
+      <h1>Registro de Extensión de Turno</h1>
+      <span>Superintendencia de Infraestructura · Sobretiempo y trabajo en descanso</span>
+    </div>
+    <div class="usr"><span>Usuario:</span><b id="usrNom"></b><button type="button" class="btn mini" id="btnSalir">Cambiar</button></div>
+  </div>
+  <nav>
+    <button data-v="registrar" class="on">Registrar</button>
+    <button data-v="registros">Registros <b id="nPend" title="Registros por completar">0</b></button>
+    <button data-v="resumen">Resumen</button>
+    <button data-v="historial">Historial</button>
+  </nav>
+</header>
+
+<main>
+<div class="mesnav" id="mesnav">
+  <button type="button" class="flecha" id="mesAnt" aria-label="Mes anterior" title="Mes anterior">&#8249;</button>
+  <div class="messel"><select id="fMes" aria-label="Seleccionar mes"></select></div>
+  <button type="button" class="flecha" id="mesSig" aria-label="Mes siguiente" title="Mes siguiente">&#8250;</button>
+  <span class="mesinfo" id="mesInfo"></span>
+</div>
+<!-- ================= REGISTRAR ================= -->
+<section class="vista on" id="v-registrar">
+  <form id="frm" novalidate>
+    <div class="card">
+      <h2><em>1</em><span id="tituloForm">Trabajadores</span> <small>Marca a quienes hicieron la extensión de turno</small> <small id="cuentaTrab"></small></h2>
+      <div class="combo" id="combo">
+        <input id="qTrab" class="buscador" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="desple" aria-label="Buscar o seleccionar trabajador" placeholder="Escribe un nombre o SAP, o abre la lista…">
+        <button type="button" class="abre" id="abreTrab" aria-label="Abrir lista de trabajadores"></button>
+        <div class="desple" id="desple"></div>
+      </div>
+      <div class="ayuda" style="margin:0 0 10px">Busca por nombre, apellido o SAP y elige de la lista; puedes sumar varios trabajadores al mismo registro. Si la persona no aparece, usa «Agregar trabajador nuevo» al final de la lista.</div>
+      <div class="elegidos" id="listaTrab"></div>
+      <button type="button" class="btn mini" id="btnLimpiaTrab">Quitar todos</button>
+    </div>
+
+    <div class="card">
+      <h2><em>2</em>Fecha y horas</h2>
+      <div class="grid">
+        <div><label>Fecha <i>*</i></label><input type="date" id="fecha" required></div>
+        <div id="boxHasta"><label>Hasta (opcional)</label><input type="date" id="hasta"><div class="ayuda">Crea un registro por cada día del rango.</div></div>
+        <div class="x2"><label>Tipo <i>*</i></label><select id="detalle" required></select></div>
+        <div><label>Horas</label><input type="number" id="hDesc" min="0" max="24" step="0.5"></div>
+        <div><label>Horas extras</label><input type="number" id="hExt" min="0" max="12" step="0.5"></div>
+        <div><label>Código</label><input id="codigo" list="dlCod" inputmode="numeric"><datalist id="dlCod"></datalist></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><em>3</em>Motivo <small>Actividad y OT que justifican la extensión</small></h2>
+      <div class="grid">
+        <div><label>Motivo <i>*</i></label><select id="motivo" required></select></div>
+        <div id="boxEvento" style="display:none"><label>N° evento climático</label><input id="nEvento" placeholder="Ej: N10"></div>
+        <div class="x2"><label>Actividad <i>*</i></label><input id="actividad" list="dlAct" placeholder="Nombre de la actividad realizada" required><datalist id="dlAct"></datalist></div>
+        <div><label>OT <i>*</i></label><input id="ot" list="dlOt" placeholder="N° de orden de trabajo" required><datalist id="dlOt"></datalist><div class="ayuda">Si no aplica, escribe "Sin OT".</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><em>4</em>Autorización</h2>
+      <div class="grid">
+        <div class="x2"><label>Autorizado por <i>*</i></label><input id="autoriza" list="dlAut" placeholder="Nombre y cargo" required><datalist id="dlAut"></datalist></div>
+        <div><label>Cargado en SAP</label><select id="cargado"><option value="0">No</option><option value="1">Sí</option></select></div>
+        <div class="x2"><label>Observación</label><input id="obs" placeholder="Opcional"></div>
+      </div>
+    </div>
+
+    <div class="aviso" id="aviso"></div>
+    <div class="resumenForm" id="resForm">Selecciona trabajadores y fecha.</div>
+    <div class="fila">
+      <button type="submit" class="btn pri" id="btnGuardar">Guardar registro</button>
+      <button type="button" class="btn" id="btnCancelar">Limpiar</button>
+    </div>
+  </form>
+</section>
+
+<!-- ================= REGISTROS ================= -->
+<section class="vista" id="v-registros">
+  <div class="card">
+    <input id="q" type="search" class="buscador" aria-label="Buscar registros" placeholder="Buscar por nombre, SAP, OT, actividad, quién autorizó o quién registró…">
+    <div class="grid">
+      <div><label>Trabajador</label><select id="fTrab"></select></div>
+      <div><label>Sindicato</label><select id="fSind"></select></div>
+      <div><label>Registrado por</label><select id="fReg"></select></div>
+      <div><label>Estado</label><select id="fEstado">
+        <option value="">Todos</option><option value="falta">Por completar (sin autorización / OT)</option>
+        <option value="pend">Pendientes de carga</option><option value="ok">Cargados</option><option value="rev">Con dato a revisar</option></select></div>
+    </div>
+    <div class="fila" style="margin-top:12px">
+      <button class="btn tur" id="btnMasivo" disabled>Completar seleccionados</button>
+      <button class="btn" id="btnMasivoOk" disabled>Marcar cargados</button>
+      <span class="sep"></span>
+      <button class="btn" id="btnCsv">Exportar a Excel</button>
+    </div>
+  </div>
+  <div class="tw"><table>
+    <thead><tr>
+      <th><input type="checkbox" id="chkTodos" style="width:auto"></th>
+      <th>Fecha</th><th>Trabajador</th><th>Sind.</th><th class="n">Horas</th><th class="n">Extras</th>
+      <th>Tipo</th><th>Cód.</th><th>Motivo</th><th>Actividad · OT</th><th>Autorizó</th><th>Registró en sistema</th><th>Cargado SAP</th><th></th>
+    </tr></thead>
+    <tbody id="tb"></tbody>
+  </table></div>
+  <div class="ayuda" id="pieTabla" style="margin-top:8px"></div>
+</section>
+
+<!-- ================= RESUMEN ================= -->
+<section class="vista" id="v-resumen">
+  <div class="card"><h2>Listado por mes</h2><div class="tw"><table>
+    <thead><tr><th>Mes</th><th class="n">Registros</th><th class="n">Trabajadores</th><th class="n">Horas</th><th class="n">Extras</th><th class="n">Total h</th><th class="n">Por completar</th><th class="n">Cargados</th><th></th></tr></thead>
+    <tbody id="tbMes"></tbody></table></div></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="card"><h2>Horas por trabajador</h2><div class="tw"><table>
+    <thead><tr><th>Trabajador</th><th>SAP</th><th>Sind.</th><th class="n">Registros</th><th class="n">Horas</th><th class="n">Extras</th><th class="n">Total h</th><th class="n">Cargados</th></tr></thead>
+    <tbody id="tbTrab"></tbody></table></div></div>
+  <div class="card"><h2>Horas por motivo</h2><div id="bMotivo"></div></div>
+  <div class="card"><h2>Horas por quien autorizó</h2><div id="bAut"></div></div>
+  <div class="card"><h2>Horas por OT</h2><div id="bOt"></div></div>
+</section>
+
+<!-- ================= HISTORIAL ================= -->
+<section class="vista" id="v-historial">
+  <div class="card"><h2>Historial de movimientos <small>Últimos 300 · quién creó, modificó o eliminó cada registro</small></h2>
+    <div class="tw"><table><thead><tr><th>Cuándo</th><th>Usuario</th><th>Acción</th><th>Registro</th></tr></thead><tbody id="tbHist"></tbody></table></div></div>
+</section>
+</main>
+<footer>Datos en línea: todos ven la misma información y cada movimiento queda con el nombre de quien lo hizo.</footer>
+
+<!-- Modales -->
+<div class="modal" id="mTrab"><div class="card">
+  <h2>Agregar trabajador nuevo</h2>
+  <p class="ayuda" style="margin-top:-6px">Queda guardado en la lista para los próximos registros. El SAP no puede repetirse.</p>
+  <div class="grid">
+    <div><label>Nombre <i>*</i></label><input id="tNom"></div>
+    <div><label>Apellidos <i>*</i></label><input id="tApe"></div>
+    <div><label>SAP <i>*</i></label><input id="tSap" inputmode="numeric"></div>
+    <div><label>Sindicato</label><input id="tSind" list="dlSind"><datalist id="dlSind"></datalist></div>
+  </div>
+  <div class="fila" style="margin-top:14px"><button class="btn pri" id="tOk">Agregar</button><button class="btn" data-cierra>Cancelar</button></div>
+</div></div>
+
+<div class="modal" id="mMasivo"><div class="card">
+  <h2>Completar <span id="nSel"></span> registros</h2>
+  <p class="ayuda" style="margin-top:-6px">Solo se aplican los campos que llenes; los vacíos no se tocan.</p>
+  <div style="display:grid;gap:10px">
+    <div><label>Actividad</label><input id="mAct" list="dlAct"></div>
+    <div><label>OT</label><input id="mOt" list="dlOt"></div>
+    <div><label>Autorizado por</label><input id="mAut" list="dlAut"></div>
+  </div>
+  <div class="fila" style="margin-top:14px"><button class="btn pri" id="mOk">Aplicar</button><button class="btn" data-cierra>Cancelar</button></div>
+</div></div>
+
+<div class="modal" id="mConf"><div class="card">
+  <h2 id="cTit">Confirmar</h2><p id="cTxt"></p>
+  <div class="fila"><button class="btn pri" id="cOk">Sí, continuar</button><button class="btn" data-cierra>Cancelar</button></div>
+</div></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* Conexión Supabase: pega aquí la URL y la clave publishable del proyecto para que la app quede lista para todos.
+   Si se dejan vacías, la app las pide una vez por navegador. */
+const SUPABASE_URL = "https://afpesjktrucaosvdnjof.supabase.co";
+const SUPABASE_KEY = "sb_publishable_XzCe8DbEExzGZDCmOdzcXw_mXzb6RYs";
+const CLAVE = "sinfra_extension_turno_v1";
+const TIPOS = [
+  {n:"Horas extras", d:0, x:2, c:""},
+  {n:"Trabajo en descanso", d:12, x:0, c:""},
+  {n:"Trabajo en descanso + horas extras", d:12, x:2, c:""},
+  {n:"Trabajo en descanso (encierro)", d:12, x:0, c:"203"},
+  {n:"Espera de cierre de camino", d:0, x:2, c:"225"},
+  {n:"Espera de apertura de camino", d:0, x:2, c:""}
+];
+const MOTIVOS = ["Desfase de turnos","Apoyo Turnos C","Apoyo Turnos C PMFC","Apoyo PMFC","Apoyo Grupo 2","Apoyo Grupo 3","Apoyo SPL","Apoyo JT","Evento climático","Mantención mayor","Emergencia operacional","Otro"];
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtF = f => f ? f.split("-").reverse().join("-") : "";
+const num = v => { const n = parseFloat(String(v).replace(",", ".")); return isNaN(n) ? 0 : n; };
+const hh = n => (Math.round(n * 10) / 10).toLocaleString("es-CL");
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const falta = r => !r.actividad || !r.ot || !r.autoriza;
+
+let db = {roster: [], regs: []};
+let editId = null, sel = new Set(), marcados = new Set(), accionConf = null, mesObj = null, trasUsuario = null, iniMes = false;
+let usuario = "", sb = null, canal = null, dentro = false;
+try { usuario = localStorage.getItem(CLAVE + "_usuario") || ""; } catch (e) {}
+const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const nomMes = m => { const p = m.split("-"); return MESES[p[1] - 1] + " " + p[0]; };
+const fmtFH = iso => { if (!iso) return ""; const d = new Date(iso), z = n => String(n).padStart(2, "0"); return `${z(d.getDate())}-${z(d.getMonth() + 1)}-${d.getFullYear()} ${z(d.getHours())}:${z(d.getMinutes())}`; };
+function conUsuario(fn) { fn(); }
+
+/* ---------- datos ---------- */
+const deFila = f => ({id: f.id, fecha: f.fecha, sap: f.sap, nom: f.nombre, ape: f.apellido, sind: f.sindicato || "", hDesc: Number(f.horas) || 0, hExt: Number(f.extras) || 0,
+  detalle: f.detalle, codigo: f.codigo || "", cargado: !!f.cargado, motivo: f.motivo || "", nEvento: f.n_evento || "", actividad: f.actividad || "", ot: f.ot || "",
+  autoriza: f.autoriza || "", obs: f.obs || "", revisar: f.revisar || "", creadoPor: f.creado_por_nombre || "", creadoEl: f.creado_el || "", modPor: f.mod_por_nombre || "", modEl: f.mod_el || ""});
+const aFila = r => ({fecha: r.fecha, sap: r.sap, nombre: r.nom, apellido: r.ape, sindicato: r.sind, horas: r.hDesc, extras: r.hExt, detalle: r.detalle, codigo: r.codigo,
+  cargado: r.cargado, motivo: r.motivo, n_evento: r.nEvento, actividad: r.actividad, ot: r.ot, autoriza: r.autoriza, obs: r.obs, revisar: r.revisar || ""});
+function falla(e) { console.error(e); toast("No se pudo completar: " + ((e && e.message) || "error de conexión")); return true; }
+async function traer(tabla, orden, vivos) {
+  const out = [];
+  for (let i = 0; ; i += 1000) { let q = sb.from(tabla).select("*"); if (vivos) q = q.eq("eliminado", false);
+    const {data, error} = await q.order(orden).range(i, i + 999); if (error) throw error; out.push(...data); if (data.length < 1000) break; }
+  return out;
+}
+async function recargar() {
+  try {
+    const [t, r] = await Promise.all([traer("ext_trabajadores", "sap"), traer("ext_registros", "id", true)]);
+    db.roster = t.map(x => ({sap: x.sap, nom: x.nombre, ape: x.apellido, sind: x.sindicato || ""})); db.regs = r.map(deFila);
+    todo(); pintarTrab(); if (document.getElementById("v-historial").classList.contains("on")) pintarHistorial();
+  } catch (e) { falla(e); }
+}
+async function porLotes(v) { const ids = [...marcados];
+  for (let i = 0; i < ids.length; i += 100) { const {error} = await sb.from("ext_registros").update(v).in("id", ids.slice(i, i + 100)); if (error) return error; }
+  return null; }
+async function pintarHistorial() {
+  const {data, error} = await sb.from("ext_historial").select("*").order("cuando", {ascending: false}).limit(300);
+  if (error) return falla(error);
+  const cls = {"Creó": "ok", "Modificó": "pend", "Eliminó": "falta"};
+  $("tbHist").innerHTML = data.length ? data.map(h => `<tr><td style="white-space:nowrap">${fmtFH(h.cuando)}</td><td><b>${esc(h.usuario_nombre)}</b></td>
+    <td><span class="tag ${cls[h.accion] || "pend"}">${esc(h.accion)}</span></td><td>${esc(h.resumen)}</td></tr>`).join("") : `<tr><td colspan="4" class="vacio">Aún no hay movimientos.</td></tr>`;
+}
+function toast(t) { const e = $("toast"); e.textContent = t; e.style.display = "block"; clearTimeout(toast.t); toast.t = setTimeout(() => e.style.display = "none", 2600); }
+function abrir(id) { $(id).classList.add("on"); }
+function cerrar() { document.querySelectorAll(".modal").forEach(m => m.classList.remove("on")); }
+function confirmar(tit, txt, fn) { $("cTit").textContent = tit; $("cTxt").textContent = txt; accionConf = fn; abrir("mConf"); }
+const unicos = k => [...new Set(db.regs.map(r => r[k]).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es"));
+const opciones = (arr, primero) => (primero != null ? `<option value="">${esc(primero)}</option>` : "") + arr.map(v => `<option>${esc(v)}</option>`).join("");
+
+/* ---------- listas ---------- */
+function refrescarListas() {
+  $("dlAct").innerHTML = opciones(unicos("actividad"));
+  $("dlOt").innerHTML = opciones(unicos("ot"));
+  $("dlAut").innerHTML = opciones(unicos("autoriza"));
+  $("dlCod").innerHTML = opciones([...new Set(["200","203","225","311","312","486", ...unicos("codigo")])]);
+  $("dlSind").innerHTML = opciones([...new Set(db.roster.map(t => t.sind).filter(Boolean))]);
+  const meses = [...new Set(db.regs.map(r => r.fecha.slice(0, 7)))].sort().reverse();
+  let act = mesObj != null ? mesObj : $("fMes").value; mesObj = null;
+  if (!iniMes) { iniMes = true; act = meses[0] || ""; }
+  const lista = [...new Set(meses.concat(act ? [act] : []))].sort().reverse();
+  $("fMes").innerHTML = lista.map(m => `<option value="${m}">${nomMes(m)}</option>`).join("") + `<option value="">Todos los meses</option>`;
+  $("fMes").value = act;
+  const am = db.regs.filter(r => !act || r.fecha.startsWith(act));
+  $("mesInfo").innerHTML = am.length ? `<b>${am.length}</b> registros · <b>${hh(am.reduce((s, r) => s + r.hDesc + r.hExt, 0))} h</b>` : "Sin registros este mes";
+  const fr = $("fReg").value; $("fReg").innerHTML = opciones(unicos("creadoPor"), "Todos"); $("fReg").value = fr;
+  $("usrNom").textContent = usuario || "Sin identificar";
+  const ft = $("fTrab").value, fs = $("fSind").value;
+  $("fTrab").innerHTML = `<option value="">Todos</option>` + ordenRoster().map(t => `<option value="${esc(t.sap)}">${esc(t.ape + ", " + t.nom)}</option>`).join("");
+  $("fTrab").value = ft;
+  $("fSind").innerHTML = opciones(unicos("sind"), "Todos"); $("fSind").value = fs;
+  $("nPend").textContent = db.regs.filter(falta).length;
+}
+const ordenRoster = () => db.roster.slice().sort((a, b) => a.ape.localeCompare(b.ape, "es"));
+function coincide() {
+  const qt = $("qTrab").value.trim().toLowerCase();
+  return ordenRoster().filter(t => !sel.has(t.sap) && (!qt || [t.nom, t.ape, t.sap, t.sind].join(" ").toLowerCase().includes(qt)));
+}
+function pintarDesple() {
+  const lt = coincide(), txt = $("qTrab").value.trim();
+  $("desple").innerHTML = lt.map(t => `<button type="button" data-sap="${esc(t.sap)}">${esc(t.ape)}, ${esc(t.nom)}<small>SAP ${esc(t.sap)} · ${esc(t.sind)}</small></button>`).join("") +
+    (lt.length ? "" : `<div class="nada">${txt ? "Ningún trabajador coincide con la búsqueda." : "Todos los trabajadores ya están seleccionados."}</div>`) +
+    `<button type="button" class="nuevo" data-nuevo>+ Agregar trabajador nuevo${txt ? `: «${esc(txt)}»` : ""}</button>`;
+}
+function desple(abrir) { $("combo").classList.toggle("on", abrir); $("qTrab").setAttribute("aria-expanded", abrir); if (abrir) pintarDesple(); }
+function nuevoTrab() {
+  const txt = $("qTrab").value.trim().toUpperCase(), p = txt.split(/\s+/);
+  ["tNom","tApe","tSap","tSind"].forEach(i => $(i).value = "");
+  if (/^\d+$/.test(txt)) $("tSap").value = txt; else if (txt) { $("tNom").value = p[0]; $("tApe").value = p.slice(1).join(" "); }
+  desple(false); abrir("mTrab");
+}
+function pintarTrab() {
+  const l = ordenRoster().filter(t => sel.has(t.sap));
+  $("listaTrab").innerHTML = l.length ? l.map(t => `<span class="chipT">${esc(t.ape)}, ${esc(t.nom)} <small>SAP ${esc(t.sap)} · ${esc(t.sind)}</small>${editId ? "" : `<button type="button" data-quita="${esc(t.sap)}" aria-label="Quitar">✕</button>`}</span>`).join("")
+    : `<span class="sinsel">Aún no hay trabajadores seleccionados.</span>`;
+  $("btnLimpiaTrab").style.display = l.length > 1 && !editId ? "" : "none";
+  $("cuentaTrab").textContent = sel.size ? `· ${sel.size} seleccionado${sel.size > 1 ? "s" : ""}` : "";
+  if ($("combo").classList.contains("on")) pintarDesple();
+  actualizarResumen();
+}
+
+/* ---------- formulario ---------- */
+function dias() {
+  const a = $("fecha").value, b = editId ? "" : $("hasta").value;
+  if (!a) return [];
+  if (!b || b <= a) return [a];
+  const out = []; const d = new Date(a + "T12:00:00"), fin = new Date(b + "T12:00:00");
+  while (d <= fin && out.length < 62) { out.push(d.toISOString().slice(0, 10)); d.setDate(d.getDate() + 1); }
+  return out;
+}
+function actualizarResumen() {
+  const d = dias(), n = sel.size * d.length, h = num($("hDesc").value) + num($("hExt").value);
+  $("resForm").innerHTML = (!sel.size || !d.length) ? "Selecciona trabajadores y fecha." :
+    editId ? `Editando 1 registro · <b>${hh(h)} h</b>` :
+    `Se crearán <b>${n}</b> registro${n > 1 ? "s" : ""} (${sel.size} trabajador${sel.size > 1 ? "es" : ""} × ${d.length} día${d.length > 1 ? "s" : ""}) · <b>${hh(n * h)} h</b> en total`;
+}
+function aplicarTipo() {
+  const t = TIPOS.find(x => x.n === $("detalle").value); if (!t) return;
+  $("hDesc").value = t.d; $("hExt").value = t.x; $("codigo").value = t.c; actualizarResumen();
+}
+function limpiarForm() {
+  editId = null; sel = new Set(); $("frm").reset();
+  $("fecha").value = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+  $("detalle").value = TIPOS[0].n; aplicarTipo(); $("boxEvento").style.display = "none"; $("boxHasta").style.display = "";
+  $("tituloForm").textContent = "Trabajadores"; $("btnGuardar").textContent = "Guardar registro"; $("btnCancelar").textContent = "Limpiar";
+  $("aviso").style.display = "none"; document.querySelectorAll(".err").forEach(e => e.classList.remove("err")); pintarTrab();
+}
+function editar(id) {
+  const r = db.regs.find(x => x.id === id); if (!r) return;
+  editId = id; sel = new Set([r.sap]);
+  if (!db.roster.some(t => t.sap === r.sap)) db.roster.push({sap: r.sap, nom: r.nom, ape: r.ape, sind: r.sind});
+  $("fecha").value = r.fecha; $("hasta").value = ""; $("boxHasta").style.display = "none";
+  if (![...$("detalle").options].some(o => o.value === r.detalle)) $("detalle").add(new Option(r.detalle));
+  $("detalle").value = r.detalle; $("hDesc").value = r.hDesc; $("hExt").value = r.hExt; $("codigo").value = r.codigo || "";
+  if (![...$("motivo").options].some(o => o.value === r.motivo)) $("motivo").add(new Option(r.motivo));
+  $("motivo").value = r.motivo; $("nEvento").value = r.nEvento || ""; $("boxEvento").style.display = r.motivo === "Evento climático" ? "" : "none";
+  $("actividad").value = r.actividad || ""; $("ot").value = r.ot || ""; $("autoriza").value = r.autoriza || "";
+  $("cargado").value = r.cargado ? "1" : "0"; $("obs").value = r.obs || "";
+  $("tituloForm").textContent = "Editando registro"; $("btnGuardar").textContent = "Guardar cambios"; $("btnCancelar").textContent = "Cancelar edición";
+  const av = $("aviso"); av.style.display = r.revisar ? "block" : "none"; av.textContent = r.revisar ? "Revisar: " + r.revisar : "";
+  pintarTrab(); ver("registrar"); window.scrollTo(0, 0);
+}
+function enviar(ev) {
+  ev.preventDefault();
+  const av = $("aviso"), errs = [], ahora = new Date().toISOString();
+  document.querySelectorAll(".err").forEach(e => e.classList.remove("err"));
+  ["fecha","detalle","motivo","actividad","ot","autoriza"].forEach(id => { if (!$(id).value.trim()) { $(id).classList.add("err"); errs.push(id); } });
+  const hD = num($("hDesc").value), hX = num($("hExt").value);
+  const msg = [];
+  if (!sel.size) msg.push("Selecciona al menos un trabajador.");
+  if (errs.length) msg.push("Completa los campos obligatorios marcados en rojo.");
+  if (hD + hX <= 0) { msg.push("Las horas deben ser mayores que cero."); $("hExt").classList.add("err"); }
+  if (msg.length) { av.textContent = msg.join(" "); av.style.display = "block"; return; }
+  const base = {hDesc: hD, hExt: hX, detalle: $("detalle").value, codigo: $("codigo").value.trim(), cargado: $("cargado").value === "1",
+    motivo: $("motivo").value, nEvento: $("motivo").value === "Evento climático" ? $("nEvento").value.trim() : "",
+    actividad: $("actividad").value.trim(), ot: $("ot").value.trim(), autoriza: $("autoriza").value.trim(), obs: $("obs").value.trim()};
+  const ds = dias(), nuevos = [], dup = [];
+  sel.forEach(sap => { const t = db.roster.find(x => x.sap === sap);
+    ds.forEach(f => {
+      if (db.regs.some(r => r.id !== editId && r.sap === sap && r.fecha === f && r.detalle === base.detalle)) dup.push(`${t.ape} ${fmtF(f)}`);
+      nuevos.push(Object.assign({fecha: f, sap: t.sap, nom: t.nom, ape: t.ape, sind: t.sind, revisar: "", creadoPor: usuario, creadoEl: ahora}, base));
+    }); });
+  const aplicar = async () => {
+    const edita = editId, n = nuevos.length; $("btnGuardar").disabled = true;
+    const {error} = edita ? await sb.from("ext_registros").update(Object.assign(aFila(nuevos[0]), {mod_por_nombre: usuario})).eq("id", edita)
+      : await sb.from("ext_registros").insert(nuevos.map(r => Object.assign(aFila(r), {creado_por_nombre: usuario})));
+    $("btnGuardar").disabled = false;
+    if (error) return falla(error);
+    if (!edita) mesObj = nuevos[0].fecha.slice(0, 7);
+    limpiarForm(); await recargar();
+    toast(edita ? "Registro actualizado" : `${n} registro${n > 1 ? "s" : ""} guardado${n > 1 ? "s" : ""}`);
+    if (edita) ver("registros");
+  };
+  if (dup.length) confirmar("Posible duplicado", `Ya existe un registro del mismo tipo para: ${dup.slice(0, 6).join("; ")}${dup.length > 6 ? "…" : ""}. ¿Guardar de todas formas?`, aplicar);
+  else aplicar();
+}
+
+/* ---------- tabla ---------- */
+function filtrados(soloMes) {
+  const m = $("fMes").value; let a = db.regs.filter(r => !m || r.fecha.startsWith(m));
+  if (soloMes) return a;
+  const q = $("q").value.trim().toLowerCase(), t = $("fTrab").value, s = $("fSind").value, e = $("fEstado").value, g = $("fReg").value;
+  return a.filter(r => (!t || r.sap === t) && (!s || r.sind === s) && (!g || r.creadoPor === g) &&
+    (!e || (e === "falta" && falta(r)) || (e === "pend" && !r.cargado) || (e === "ok" && r.cargado) || (e === "rev" && r.revisar)) &&
+    (!q || [r.nom, r.ape, r.sap, r.ot, r.actividad, r.autoriza, r.motivo, r.detalle, r.codigo, r.creadoPor, r.modPor].join(" ").toLowerCase().includes(q)))
+    .sort((x, y) => y.fecha.localeCompare(x.fecha) || x.ape.localeCompare(y.ape, "es"));
+}
+function pintarTabla() {
+  const a = filtrados(); const ids = new Set(a.map(r => r.id)); marcados.forEach(i => { if (!ids.has(i)) marcados.delete(i); });
+  $("tb").innerHTML = a.length ? a.map(r => `<tr>
+    <td><input type="checkbox" class="chk" data-id="${r.id}" style="width:auto" ${marcados.has(r.id) ? "checked" : ""}></td>
+    <td style="white-space:nowrap">${fmtF(r.fecha)}${r.revisar ? `<br><span class="tag rev" title="${esc(r.revisar)}">Revisar</span>` : ""}</td>
+    <td><b>${esc(r.ape)}</b>, ${esc(r.nom)}<br><span class="ayuda">SAP ${esc(r.sap)}</span></td>
+    <td>${esc(r.sind)}</td><td class="n">${r.hDesc ? hh(r.hDesc) : "–"}</td><td class="n">${r.hExt ? hh(r.hExt) : "–"}</td>
+    <td>${esc(r.detalle)}</td><td>${esc(r.codigo) || "–"}</td>
+    <td>${esc(r.motivo)}${r.nEvento ? " " + esc(r.nEvento) : ""}</td>
+    <td>${r.actividad ? esc(r.actividad) : `<span class="tag falta">Sin actividad</span>`}<br>${r.ot ? `<span class="ayuda">OT ${esc(r.ot)}</span>` : `<span class="tag falta">Sin OT</span>`}</td>
+    <td>${r.autoriza ? esc(r.autoriza) : `<span class="tag falta">Sin autorización</span>`}</td>
+    <td>${esc(r.creadoPor || "Sin dato")}${r.creadoEl ? `<br><span class="ayuda">${fmtFH(r.creadoEl)}</span>` : ""}${r.modPor ? `<br><span class="ayuda">Modif.: ${esc(r.modPor)} · ${fmtFH(r.modEl)}</span>` : ""}</td>
+    <td><button class="tag ${r.cargado ? "ok" : "pend"}" data-carga="${r.id}" title="Cambiar estado de carga">${r.cargado ? "Sí" : "No"}</button></td>
+    <td style="white-space:nowrap"><button class="btn mini" data-ed="${r.id}">${falta(r) ? "Completar" : "Editar"}</button> <button class="btn mini rojo" data-del="${r.id}" title="Eliminar">✕</button></td>
+  </tr>`).join("") : `<tr><td colspan="14" class="vacio">No hay registros con estos filtros.</td></tr>`;
+  const tot = a.reduce((s, r) => s + r.hDesc + r.hExt, 0);
+  $("pieTabla").textContent = `${a.length} registros · ${hh(tot)} h · ${a.filter(falta).length} por completar`;
+  $("chkTodos").checked = a.length > 0 && a.every(r => marcados.has(r.id));
+  $("btnMasivo").disabled = $("btnMasivoOk").disabled = !marcados.size;
+  $("btnMasivo").textContent = marcados.size ? `Completar seleccionados (${marcados.size})` : "Completar seleccionados";
+}
+
+/* ---------- resumen ---------- */
+function barras(el, a, clave, cls) {
+  const m = {}; a.forEach(r => { const k = (typeof clave === "function" ? clave(r) : r[clave]) || "Sin registrar"; m[k] = (m[k] || 0) + r.hDesc + r.hExt; });
+  const l = Object.entries(m).sort((x, y) => y[1] - x[1]), max = l.length ? l[0][1] : 1;
+  $(el).innerHTML = l.length ? l.map(([k, v]) => `<div class="barra ${cls}"><span style="text-align:left;font-weight:400">${esc(k)}</span><div><i style="width:${Math.max(2, v / max * 100)}%"></i></div><span>${hh(v)} h</span></div>`).join("") : `<div class="vacio">Sin datos.</div>`;
+}
+function pintarResumen() {
+  const mm = {}; db.regs.forEach(r => { const k = r.fecha.slice(0, 7), t = mm[k] || (mm[k] = {n: 0, d: 0, x: 0, f: 0, c: 0, p: new Set()});
+    t.n++; t.d += r.hDesc; t.x += r.hExt; if (falta(r)) t.f++; if (r.cargado) t.c++; t.p.add(r.sap); });
+  $("tbMes").innerHTML = Object.keys(mm).sort().reverse().map(k => { const t = mm[k]; return `<tr><td><b>${nomMes(k)}</b></td><td class="n">${t.n}</td><td class="n">${t.p.size}</td>
+    <td class="n">${hh(t.d)}</td><td class="n">${hh(t.x)}</td><td class="n"><b>${hh(t.d + t.x)}</b></td><td class="n">${t.f}</td><td class="n">${t.c}/${t.n}</td>
+    <td class="n"><button class="btn mini" data-mes="${k}">Ver listado</button></td></tr>`; }).join("") || `<tr><td colspan="9" class="vacio">Sin datos.</td></tr>`;
+  const a = filtrados(true), d = a.reduce((s, r) => s + r.hDesc, 0), x = a.reduce((s, r) => s + r.hExt, 0);
+  $("kpis").innerHTML = [[hh(d + x), "Horas totales"], [hh(d), "Horas"], [hh(x), "Horas extras"],
+    [a.filter(falta).length, "Sin autorización / OT"], [a.filter(r => !r.cargado).length, "Pendientes de carga"]]
+    .map(k => `<div class="kpi"><b>${k[0]}</b><span>${k[1]}</span></div>`).join("");
+  const m = {}; a.forEach(r => { const t = m[r.sap] || (m[r.sap] = {r, n: 0, d: 0, x: 0, c: 0}); t.n++; t.d += r.hDesc; t.x += r.hExt; if (r.cargado) t.c++; });
+  const l = Object.values(m).sort((p, q) => (q.d + q.x) - (p.d + p.x));
+  $("tbTrab").innerHTML = l.length ? l.map(t => `<tr><td><b>${esc(t.r.ape)}</b>, ${esc(t.r.nom)}</td><td>${esc(t.r.sap)}</td><td>${esc(t.r.sind)}</td>
+    <td class="n">${t.n}</td><td class="n">${hh(t.d)}</td><td class="n">${hh(t.x)}</td><td class="n"><b>${hh(t.d + t.x)}</b></td><td class="n">${t.c}/${t.n}</td></tr>`).join("")
+    : `<tr><td colspan="8" class="vacio">Sin datos.</td></tr>`;
+  barras("bMotivo", a, r => r.motivo + (r.nEvento ? " " + r.nEvento : ""), "");
+  barras("bAut", a, "autoriza", "n"); barras("bOt", a, r => r.ot ? "OT " + r.ot + (r.actividad ? " · " + r.actividad : "") : "", "d");
+}
+function todo() { refrescarListas(); pintarTabla(); pintarResumen(); }
+function ver(v) {
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  document.querySelectorAll(".vista").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
+  $("mesnav").style.display = v === "registrar" || v === "historial" ? "none" : "flex";
+  if (v === "historial" && sb) pintarHistorial();
+}
+
+/* ---------- exportar ---------- */
+function bajar(nombre, texto, tipo) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(Array.isArray(texto) ? texto : [texto], {type: tipo})); a.download = nombre;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+/* ---------- exportar a Excel (.xlsx con formato, sin librerías) ---------- */
+const xe = s => String(s == null ? "" : s).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const col = i => String.fromCharCode(65 + i);
+const cS = (c, r, v, s) => v === "" || v == null ? `<c r="${col(c)}${r}" s="${s}"/>` : `<c r="${col(c)}${r}" s="${s}" t="inlineStr"><is><t xml:space="preserve">${xe(v)}</t></is></c>`;
+const cN = (c, r, v, s) => v === "" || v == null || v === 0 ? `<c r="${col(c)}${r}" s="${s}"/>` : `<c r="${col(c)}${r}" s="${s}"><v>${v}</v></c>`;
+const cA = (c, r, v, s) => /^\d{1,12}$/.test(String(v)) ? cN(c, r, +v, s) : cS(c, r, v, s);
+const cF = (c, r, f, v, s) => `<c r="${col(c)}${r}" s="${s}"><f>${f}</f><v>${v}</v></c>`;
+const serie = f => Math.round(Date.UTC(+f.slice(0, 4), +f.slice(5, 7) - 1, +f.slice(8, 10)) / 864e5) + 25569;
+const XMLH = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n', NS = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
+function hojaXml(filas, anchos, congela, filtro, uniones) {
+  return XMLH + `<worksheet ${NS}><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>
+<sheetViews><sheetView workbookViewId="0" showGridLines="0"><pane ySplit="${congela}" topLeftCell="A${congela + 1}" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
+<sheetFormatPr defaultRowHeight="16"/><cols>${anchos.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join("")}</cols>
+<sheetData>${filas}</sheetData>${filtro ? `<autoFilter ref="${filtro}"/>` : ""}
+<mergeCells count="${uniones.length}">${uniones.map(u => `<mergeCell ref="${u}"/>`).join("")}</mergeCells>
+<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>`;
+}
+const ESTILOS = XMLH + `<styleSheet ${NS}><numFmts count="1"><numFmt numFmtId="164" formatCode="dd-mm-yyyy"/></numFmts>
+<fonts count="5"><font><sz val="10"/><color rgb="FF36424A"/><name val="Calibri"/></font><font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>
+<font><b/><sz val="16"/><color rgb="FFE55302"/><name val="Calibri"/></font><font><sz val="9"/><color rgb="FF6B757C"/><name val="Calibri"/></font>
+<font><b/><sz val="10"/><color rgb="FF36424A"/><name val="Calibri"/></font></fonts>
+<fills count="5"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FF36424A"/><bgColor indexed="64"/></patternFill></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FFF7F6F1"/><bgColor indexed="64"/></patternFill></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FFFFEFC2"/><bgColor indexed="64"/></patternFill></fill></fills>
+<borders count="3"><border><left/><right/><top/><bottom/><diagonal/></border>
+<border><left style="thin"><color rgb="FFDFDDD0"/></left><right style="thin"><color rgb="FFDFDDD0"/></right><top style="thin"><color rgb="FFDFDDD0"/></top><bottom style="thin"><color rgb="FFDFDDD0"/></bottom><diagonal/></border>
+<border><left/><right/><top style="medium"><color rgb="FFE55302"/></top><bottom/><diagonal/></border></borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="12">
+<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>
+<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>
+<xf numFmtId="0" fontId="0" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>
+<xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf numFmtId="164" fontId="0" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf numFmtId="0" fontId="0" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf numFmtId="0" fontId="4" fillId="4" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>
+<xf numFmtId="0" fontId="4" fillId="4" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+const CRCT = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = b => { let c = -1; for (let i = 0; i < b.length; i++) c = CRCT[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ -1) >>> 0; };
+function zip(archivos) {
+  const enc = new TextEncoder(), partes = [], cen = []; let pos = 0;
+  const u16 = n => [n & 255, n >>> 8 & 255], u32 = n => [n & 255, n >>> 8 & 255, n >>> 16 & 255, n >>> 24 & 255];
+  archivos.forEach(([nombre, txt]) => { const nm = enc.encode(nombre), dat = enc.encode(txt);
+    const comun = [...u16(20), ...u16(0), ...u16(0), ...u16(0), ...u16(0x21), ...u32(crc32(dat)), ...u32(dat.length), ...u32(dat.length), ...u16(nm.length), ...u16(0)];
+    const loc = new Uint8Array([0x50, 0x4B, 3, 4, ...comun]); partes.push(loc, nm, dat);
+    cen.push(new Uint8Array([0x50, 0x4B, 1, 2, ...u16(20), ...comun, ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(pos)]), nm);
+    pos += loc.length + nm.length + dat.length; });
+  const lc = cen.reduce((s, p) => s + p.length, 0);
+  return [...partes, ...cen, new Uint8Array([0x50, 0x4B, 5, 6, 0, 0, 0, 0, ...u16(archivos.length), ...u16(archivos.length), ...u32(lc), ...u32(pos), 0, 0])];
+}
+function armarXlsx() {
+  const a = filtrados().slice().sort((x, y) => x.ape.localeCompare(y.ape, "es") || x.nom.localeCompare(y.nom, "es") || x.fecha.localeCompare(y.fecha));
+  if (!a.length) return null;
+  const mes = $("fMes").value, per = mes ? nomMes(mes) : "Todos los meses";
+  const sub = `Codelco División Andina · Superintendencia de Infraestructura · Exportado el ${fmtFH(new Date().toISOString())}${usuario ? " por " + usuario : ""}`;
+  /* Hoja 1: detalle */
+  const H = ["ID","Fecha","Nombre","Apellido","SAP","Horas","Extras","Detalle","Código","Cargado SAP","Sindicato","Motivo","Actividad","OT","Autorizado por","Observación","Registrado por","Fecha registro"];
+  const W = [5, 12, 14, 24, 9, 8, 8, 34, 9, 10, 11, 24, 34, 13, 24, 28, 24, 17], U = col(H.length - 1);
+  let f = `<row r="1" ht="28" customHeight="1">${cS(0, 1, "DETALLE SOBRETIEMPO · " + per.toUpperCase(), 1)}</row><row r="2">${cS(0, 2, sub, 2)}</row>
+<row r="4" ht="26" customHeight="1">${H.map((h, i) => cS(i, 4, h, 3)).join("")}</row>`;
+  const cnt = {}, res = {}; let tD = 0, tX = 0;
+  a.forEach((d, i) => { const n = 5 + i, z = i % 2, L = 4 + z, C = 8 + z; tD += d.hDesc; tX += d.hExt;
+    const t = res[d.sap] || (res[d.sap] = {d, n: 0, h: 0, x: 0}); t.n++; t.h += d.hDesc; t.x += d.hExt;
+    f += `<row r="${n}" ht="18" customHeight="1">` + cN(0, n, cnt[d.sap] = (cnt[d.sap] || 0) + 1, C) + `<c r="B${n}" s="${6 + z}"><v>${serie(d.fecha)}</v></c>` +
+      cS(2, n, d.nom, L) + cS(3, n, d.ape, L) + cA(4, n, d.sap, C) + cN(5, n, d.hDesc, C) + cN(6, n, d.hExt, C) + cS(7, n, d.detalle, L) + cA(8, n, d.codigo, C) +
+      cS(9, n, d.cargado ? "Sí" : "No", C) + cS(10, n, d.sind, C) + cS(11, n, d.motivo + (d.nEvento ? " " + d.nEvento : ""), L) + cS(12, n, d.actividad, L) + cA(13, n, d.ot, C) +
+      cS(14, n, d.autoriza, L) + cS(15, n, d.obs, L) + cS(16, n, d.creadoPor, L) + cS(17, n, fmtFH(d.creadoEl), C) + `</row>`; });
+  const ult = 4 + a.length, tot = ult + 1;
+  f += `<row r="${tot}" ht="20" customHeight="1">` + H.map((h, i) => i === 3 ? cS(i, tot, "TOTAL HORAS", 10) : i === 5 ? cF(i, tot, `SUBTOTAL(109,F5:F${ult})`, tD, 11) :
+    i === 6 ? cF(i, tot, `SUBTOTAL(109,G5:G${ult})`, tX, 11) : cS(i, tot, "", 10)).join("") + `</row>`;
+  const h1 = hojaXml(f, W, 4, `A4:${U}${ult}`, [`A1:${U}1`, `A2:${U}2`]);
+  /* Hoja 2: resumen por trabajador */
+  const H2 = ["Trabajador","SAP","Sindicato","Registros","Horas","Extras","Total h"], l = Object.values(res).sort((p, q) => (q.h + q.x) - (p.h + p.x));
+  let g = `<row r="1" ht="28" customHeight="1">${cS(0, 1, "RESUMEN POR TRABAJADOR · " + per.toUpperCase(), 1)}</row><row r="2">${cS(0, 2, sub, 2)}</row>
+<row r="4" ht="26" customHeight="1">${H2.map((h, i) => cS(i, 4, h, 3)).join("")}</row>`;
+  l.forEach((t, i) => { const n = 5 + i, z = i % 2, C = 8 + z;
+    g += `<row r="${n}" ht="18" customHeight="1">` + cS(0, n, t.d.ape + ", " + t.d.nom, 4 + z) + cA(1, n, t.d.sap, C) + cS(2, n, t.d.sind, C) + cN(3, n, t.n, C) + cN(4, n, t.h, C) + cN(5, n, t.x, C) + cF(6, n, `E${n}+F${n}`, t.h + t.x, C) + `</row>`; });
+  const u2 = 4 + l.length, t2 = u2 + 1;
+  g += `<row r="${t2}" ht="20" customHeight="1">` + cS(0, t2, "TOTAL", 10) + cS(1, t2, "", 10) + cS(2, t2, "", 10) + [[3, a.length], [4, tD], [5, tX], [6, tD + tX]].map(([c, v]) => cF(c, t2, `SUM(${col(c)}5:${col(c)}${u2})`, v, 11)).join("") + `</row>`;
+  const h2 = hojaXml(g, [34, 10, 12, 11, 10, 10, 10], 4, "", ["A1:G1", "A2:G2"]);
+  const R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships", P = "http://schemas.openxmlformats.org/package/2006";
+  return {nombre: `Sobretiempo_${per.replace(/ /g, "_")}.xlsx`, n: a.length, partes: zip([
+    ["[Content_Types].xml", XMLH + `<Types xmlns="${P}/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`],
+    ["_rels/.rels", XMLH + `<Relationships xmlns="${P}/relationships"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
+    ["xl/workbook.xml", XMLH + `<workbook ${NS} xmlns:r="${R}"><sheets><sheet name="Detalle" sheetId="1" r:id="rId1"/><sheet name="Resumen" sheetId="2" r:id="rId2"/></sheets><definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">Detalle!$A$4:$${U}$${ult}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="0">Detalle!$4:$4</definedName></definedNames><calcPr fullCalcOnLoad="1"/></workbook>`],
+    ["xl/_rels/workbook.xml.rels", XMLH + `<Relationships xmlns="${P}/relationships"><Relationship Id="rId1" Type="${R}/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="${R}/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="${R}/styles" Target="styles.xml"/></Relationships>`],
+    ["xl/styles.xml", ESTILOS], ["xl/worksheets/sheet1.xml", h1], ["xl/worksheets/sheet2.xml", h2]])};
+}
+function exportarExcel() {
+  const x = armarXlsx(); if (!x) return toast("No hay registros para exportar con estos filtros");
+  bajar(x.nombre, x.partes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); toast(`${x.n} registros exportados a Excel`);
+}
+
+/* ---------- eventos ---------- */
+document.querySelector("nav").addEventListener("click", e => { const b = e.target.closest("button"); if (b) ver(b.dataset.v); });
+$("qTrab").addEventListener("focus", () => desple(true));
+$("qTrab").addEventListener("input", () => desple(true));
+$("qTrab").addEventListener("keydown", e => {
+  if (e.key === "Escape") desple(false);
+  if (e.key === "Enter") { e.preventDefault(); const l = coincide(); if (l.length === 1) elegir(l[0].sap); else if (!l.length && $("qTrab").value.trim()) nuevoTrab(); }
+});
+$("abreTrab").onclick = () => { const a = !$("combo").classList.contains("on"); desple(a); if (a) $("qTrab").focus(); };
+function elegir(sap) { if (editId) { sel = new Set([sap]); desple(false); } else sel.add(sap); $("qTrab").value = ""; pintarTrab(); }
+$("desple").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; if (b.dataset.sap) elegir(b.dataset.sap); else nuevoTrab(); });
+$("listaTrab").addEventListener("click", e => { const b = e.target.closest("[data-quita]"); if (b) { sel.delete(b.dataset.quita); pintarTrab(); } });
+document.addEventListener("click", e => { if (document.contains(e.target) && !e.target.closest("#combo")) desple(false); });
+$("btnLimpiaTrab").onclick = () => { if (!editId) { sel = new Set(); pintarTrab(); } };
+$("tOk").onclick = async () => {
+  const t = {nom: $("tNom").value.trim().toUpperCase(), ape: $("tApe").value.trim().toUpperCase(), sap: $("tSap").value.trim(), sind: $("tSind").value.trim().toUpperCase()};
+  if (!t.nom || !t.ape || !t.sap) return toast("Nombre, apellidos y SAP son obligatorios");
+  if (db.roster.some(x => x.sap === t.sap)) return toast("Ya existe un trabajador con ese SAP");
+  const {error} = await sb.from("ext_trabajadores").insert({sap: t.sap, nombre: t.nom, apellido: t.ape, sindicato: t.sind, creado_por_nombre: usuario});
+  if (error) return error.code === "23505" ? toast("Ya existe un trabajador con ese SAP") : falla(error);
+  db.roster.push(t); if (editId) sel = new Set([t.sap]); else sel.add(t.sap); $("qTrab").value = ""; cerrar(); pintarTrab(); refrescarListas(); toast("Trabajador agregado y seleccionado");
+};
+$("detalle").onchange = aplicarTipo;
+$("motivo").onchange = () => $("boxEvento").style.display = $("motivo").value === "Evento climático" ? "" : "none";
+["fecha","hasta","hDesc","hExt"].forEach(i => $(i).addEventListener("input", actualizarResumen));
+$("frm").addEventListener("submit", enviar);
+$("btnCancelar").onclick = () => { const v = !!editId; limpiarForm(); if (v) ver("registros"); };
+["q","fTrab","fSind","fEstado","fReg"].forEach(i => $(i).addEventListener("input", pintarTabla));
+$("fMes").onchange = () => { mesObj = $("fMes").value; todo(); };
+function moverMes(d) {
+  let m = $("fMes").value;
+  if (!m) m = [...new Set(db.regs.map(r => r.fecha.slice(0, 7)))].sort().pop() || new Date().toISOString().slice(0, 7);
+  else { let a = +m.slice(0, 4), b = +m.slice(5) + d; if (b < 1) { b = 12; a--; } if (b > 12) { b = 1; a++; } m = a + "-" + String(b).padStart(2, "0"); }
+  mesObj = m; todo();
+}
+$("mesAnt").onclick = () => moverMes(-1); $("mesSig").onclick = () => moverMes(1);
+$("tbMes").addEventListener("click", e => { const b = e.target.closest("[data-mes]"); if (b) { mesObj = b.dataset.mes; todo(); ver("registros"); } });
+$("chkTodos").onchange = e => { filtrados().forEach(r => e.target.checked ? marcados.add(r.id) : marcados.delete(r.id)); pintarTabla(); };
+$("tb").addEventListener("click", e => {
+  const b = e.target.closest("button"), k = e.target.closest(".chk");
+  if (k) { k.checked ? marcados.add(k.dataset.id) : marcados.delete(k.dataset.id); return pintarTabla(); }
+  if (!b) return;
+  if (b.dataset.ed) editar(b.dataset.ed);
+  if (b.dataset.carga) { const r = db.regs.find(x => x.id === b.dataset.carga);
+    sb.from("ext_registros").update({cargado: !r.cargado, mod_por_nombre: usuario}).eq("id", r.id).then(({error}) => error ? falla(error) : recargar()); }
+  if (b.dataset.del) { const r = db.regs.find(x => x.id === b.dataset.del);
+    confirmar("Eliminar registro", `${r.ape}, ${r.nom} · ${fmtF(r.fecha)} · ${r.detalle}. Quedará anotado en el historial.`, async () => { const {error} = await sb.from("ext_registros").update({eliminado: true, mod_por_nombre: usuario}).eq("id", r.id); if (error) return falla(error);
+      marcados.delete(r.id); await recargar(); toast("Registro eliminado"); }); }
+});
+$("btnMasivo").onclick = () => conUsuario(() => { ["mAct","mOt","mAut"].forEach(i => $(i).value = ""); $("nSel").textContent = marcados.size; abrir("mMasivo"); });
+$("mOk").onclick = async () => {
+  const v = {actividad: $("mAct").value.trim(), ot: $("mOt").value.trim(), autoriza: $("mAut").value.trim()};
+  Object.keys(v).forEach(k => { if (!v[k]) delete v[k]; });
+  if (!Object.keys(v).length) return toast("Llena al menos un campo");
+  v.mod_por_nombre = usuario;
+  const error = await porLotes(v); if (error) return falla(error);
+  const n = marcados.size; marcados = new Set(); cerrar(); await recargar(); toast(`${n} registros actualizados`);
+};
+$("btnMasivoOk").onclick = async () => {
+  const error = await porLotes({cargado: true, mod_por_nombre: usuario}); if (error) return falla(error);
+  const n = marcados.size; marcados = new Set(); await recargar(); toast(`${n} registros marcados como cargados`);
+};
+$("btnCsv").onclick = exportarExcel;
+$("cOk").onclick = () => { const f = accionConf; accionConf = null; cerrar(); if (f) f(); };
+document.querySelectorAll("[data-cierra]").forEach(b => b.onclick = cerrar);
+document.querySelectorAll(".modal").forEach(m => m.addEventListener("click", e => { if (e.target === m) cerrar(); }));
+
+/* ---------- conexión y registro inicial de usuario ---------- */
+function pantalla(p, msg) {
+  $("acceso").style.display = p ? "flex" : "none";
+  ["aCarga", "aCfg", "aNombre"].forEach(i => $(i).style.display = i === p ? "" : "none");
+  const m = $("aMsg"); m.textContent = msg || ""; m.style.display = msg ? "block" : "none";
+}
+function leerCfg() {
+  if (SUPABASE_URL && SUPABASE_KEY) return {url: SUPABASE_URL, key: SUPABASE_KEY};
+  try { const c = JSON.parse(localStorage.getItem(CLAVE + "_cfg")); if (c && c.url && c.key) return c; } catch (e) {}
+  return null;
+}
+async function entrar() {
+  if (!usuario) return pantalla("aNombre");
+  $("usrNom").textContent = usuario;
+  if (dentro) return pantalla(null);
+  pantalla("aCarga"); iniMes = false;
+  try { const [t, r] = await Promise.all([traer("ext_trabajadores", "sap"), traer("ext_registros", "id", true)]);
+    db.roster = t.map(x => ({sap: x.sap, nom: x.nombre, ape: x.apellido, sind: x.sindicato || ""})); db.regs = r.map(deFila);
+  } catch (e) { console.error(e); return pantalla(leerCfg() && !SUPABASE_URL ? "aCfg" : "aCarga", "No se pudo conectar a la base de datos: " + ((e && e.message) || "sin conexión") + ". Revisa la URL, la clave y que el SQL esté ejecutado."); }
+  dentro = true; limpiarForm(); todo(); pantalla(null);
+  let tmr; const cambio = () => { clearTimeout(tmr); tmr = setTimeout(recargar, 400); };
+  canal = sb.channel("ext-turno").on("postgres_changes", {event: "*", schema: "public", table: "ext_registros"}, cambio)
+    .on("postgres_changes", {event: "*", schema: "public", table: "ext_trabajadores"}, cambio).subscribe();
+}
+function conectar() {
+  const c = leerCfg(); if (!c) return pantalla("aCfg");
+  if (!window.supabase) return pantalla("aCarga", "No se pudo cargar la librería de Supabase. Revisa la conexión a internet y recarga la página.");
+  try { sb = window.supabase.createClient(c.url, c.key, {auth: {persistSession: false}}); } catch (e) { return pantalla("aCfg", "La URL o la clave no son válidas."); }
+  entrar();
+}
+$("aCfg").addEventListener("submit", e => { e.preventDefault();
+  const url = $("cUrl").value.trim().replace(/\/+$/, ""), key = $("cKey").value.trim();
+  if (!/^https:\/\/.+/.test(url) || !key) return pantalla("aCfg", "Ingresa la URL (https://…) y la clave.");
+  try { localStorage.setItem(CLAVE + "_cfg", JSON.stringify({url, key})); } catch (x) {} conectar(); });
+$("aNombre").addEventListener("submit", e => { e.preventDefault();
+  const cap = s => s.trim().replace(/\s+/g, " ").toLowerCase().replace(/(^|[\s-])\p{L}/gu, c => c.toUpperCase());
+  const n = cap($("aNom").value), a = cap($("aApe").value);
+  if (!n || !a) return pantalla("aNombre", "Escribe tu nombre y tu apellido.");
+  usuario = n + " " + a; try { localStorage.setItem(CLAVE + "_usuario", usuario); } catch (x) {}
+  entrar(); });
+$("btnSalir").onclick = () => { const p = usuario.split(" "); $("aNom").value = p[0] || ""; $("aApe").value = p.slice(1).join(" "); pantalla("aNombre"); };
+
+/* ---------- inicio ---------- */
+$("detalle").innerHTML = opciones(TIPOS.map(t => t.n));
+$("motivo").innerHTML = opciones(MOTIVOS, "Selecciona…");
+limpiarForm(); todo(); conectar();
+</script>
+</body>
+</html>
