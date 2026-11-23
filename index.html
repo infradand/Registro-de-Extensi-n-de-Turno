@@ -197,8 +197,8 @@ footer{max-width:1200px;margin:0 auto;padding:6px 16px 26px;font-size:11px;color
         <div><label>Fecha <i>*</i></label><input type="date" id="fecha" required></div>
         <div id="boxHasta"><label>Hasta (opcional)</label><input type="date" id="hasta"><div class="ayuda">Crea un registro por cada día del rango.</div></div>
         <div class="x2"><label>Tipo <i>*</i></label><select id="detalle" required></select></div>
-        <div><label>Horas</label><input type="number" id="hDesc" min="0" max="24" step="0.5"></div>
-        <div><label>Horas extras</label><input type="number" id="hExt" min="0" max="12" step="0.5"></div>
+        <div><label>Trabajo en descanso (h)</label><input type="number" id="hDesc" min="0" max="24" step="0.5"></div>
+        <div><label>Horas extras (h)</label><input type="number" id="hExt" min="0" max="12" step="0.5"></div>
         <div><label>Código</label><input id="codigo" list="dlCod" inputmode="numeric"><datalist id="dlCod"></datalist></div>
       </div>
     </div>
@@ -253,7 +253,7 @@ footer{max-width:1200px;margin:0 auto;padding:6px 16px 26px;font-size:11px;color
   <div class="tw"><table>
     <thead><tr>
       <th><input type="checkbox" id="chkTodos" style="width:auto"></th>
-      <th>Fecha</th><th>Trabajador</th><th>Sind.</th><th class="n">Horas</th><th class="n">Extras</th>
+      <th>Fecha</th><th>Trabajador</th><th>Sind.</th><th class="n">Trabajo en<br>descanso (h)</th><th class="n">Horas<br>extras (h)</th>
       <th>Tipo</th><th>Cód.</th><th>Motivo</th><th>Actividad · OT</th><th>Autorizó</th><th>Registró en sistema</th><th>Cargado SAP</th><th></th>
     </tr></thead>
     <tbody id="tb"></tbody>
@@ -264,11 +264,11 @@ footer{max-width:1200px;margin:0 auto;padding:6px 16px 26px;font-size:11px;color
 <!-- ================= RESUMEN ================= -->
 <section class="vista" id="v-resumen">
   <div class="card"><h2>Listado por mes</h2><div class="tw"><table>
-    <thead><tr><th>Mes</th><th class="n">Registros</th><th class="n">Trabajadores</th><th class="n">Horas</th><th class="n">Extras</th><th class="n">Total h</th><th class="n">Por completar</th><th class="n">Cargados</th><th></th></tr></thead>
+    <thead><tr><th>Mes</th><th class="n">Registros</th><th class="n">Trabajadores</th><th class="n">Trabajo en<br>descanso (h)</th><th class="n">Horas<br>extras (h)</th><th class="n">Total (h)</th><th class="n">Por completar</th><th class="n">Cargados</th><th></th></tr></thead>
     <tbody id="tbMes"></tbody></table></div></div>
   <div class="kpis" id="kpis"></div>
   <div class="card"><h2>Horas por trabajador</h2><div class="tw"><table>
-    <thead><tr><th>Trabajador</th><th>SAP</th><th>Sind.</th><th class="n">Registros</th><th class="n">Horas</th><th class="n">Extras</th><th class="n">Total h</th><th class="n">Cargados</th></tr></thead>
+    <thead><tr><th>Trabajador</th><th>SAP</th><th>Sind.</th><th class="n">Registros</th><th class="n">Trabajo en<br>descanso (h)</th><th class="n">Horas<br>extras (h)</th><th class="n">Total (h)</th><th class="n">Cargados</th></tr></thead>
     <tbody id="tbTrab"></tbody></table></div></div>
   <div class="card"><h2>Horas por motivo</h2><div id="bMotivo"></div></div>
   <div class="card"><h2>Horas por quien autorizó</h2><div id="bAut"></div></div>
@@ -555,7 +555,7 @@ function pintarResumen() {
     <td class="n">${hh(t.d)}</td><td class="n">${hh(t.x)}</td><td class="n"><b>${hh(t.d + t.x)}</b></td><td class="n">${t.f}</td><td class="n">${t.c}/${t.n}</td>
     <td class="n"><button class="btn mini" data-mes="${k}">Ver listado</button></td></tr>`; }).join("") || `<tr><td colspan="9" class="vacio">Sin datos.</td></tr>`;
   const a = filtrados(true), d = a.reduce((s, r) => s + r.hDesc, 0), x = a.reduce((s, r) => s + r.hExt, 0);
-  $("kpis").innerHTML = [[hh(d + x), "Horas totales"], [hh(d), "Horas"], [hh(x), "Horas extras"],
+  $("kpis").innerHTML = [[hh(d + x) + " h", "Total de horas"], [hh(d) + " h", "Trabajo en descanso"], [hh(x) + " h", "Horas extras"],
     [a.filter(falta).length, "Sin autorización / OT"], [a.filter(r => !r.cargado).length, "Pendientes de carga"]]
     .map(k => `<div class="kpi"><b>${k[0]}</b><span>${k[1]}</span></div>`).join("");
   const m = {}; a.forEach(r => { const t = m[r.sap] || (m[r.sap] = {r, n: 0, d: 0, x: 0, c: 0}); t.n++; t.d += r.hDesc; t.x += r.hExt; if (r.cargado) t.c++; });
@@ -641,10 +641,10 @@ function armarXlsx() {
   const mes = $("fMes").value, per = mes ? nomMes(mes) : "Todos los meses";
   const sub = `Codelco División Andina · Superintendencia de Infraestructura · Exportado el ${fmtFH(new Date().toISOString())}${usuario ? " por " + usuario : ""}`;
   /* Hoja 1: detalle */
-  const H = ["ID","Fecha","Nombre","Apellido","SAP","Horas","Extras","Detalle","Código","Cargado SAP","Sindicato","Motivo","Actividad","OT","Autorizado por","Observación","Registrado por","Fecha registro"];
-  const W = [5, 12, 14, 24, 9, 8, 8, 34, 9, 10, 11, 24, 34, 13, 24, 28, 24, 17], U = col(H.length - 1);
+  const H = ["ID","Fecha","Nombre","Apellido","SAP","Trabajo en descanso (h)","Horas extras (h)","Detalle","Código","Cargado SAP","Sindicato","Motivo","Actividad","OT","Autorizado por","Observación","Registrado por","Fecha registro"];
+  const W = [5, 12, 14, 24, 9, 12, 10, 34, 9, 10, 11, 24, 34, 13, 24, 28, 24, 17], U = col(H.length - 1);
   let f = `<row r="1" ht="28" customHeight="1">${cS(0, 1, "DETALLE SOBRETIEMPO · " + per.toUpperCase(), 1)}</row><row r="2">${cS(0, 2, sub, 2)}</row>
-<row r="4" ht="26" customHeight="1">${H.map((h, i) => cS(i, 4, h, 3)).join("")}</row>`;
+<row r="4" ht="32" customHeight="1">${H.map((h, i) => cS(i, 4, h, 3)).join("")}</row>`;
   const cnt = {}, res = {}; let tD = 0, tX = 0;
   a.forEach((d, i) => { const n = 5 + i, z = i % 2, L = 4 + z, C = 8 + z; tD += d.hDesc; tX += d.hExt;
     const t = res[d.sap] || (res[d.sap] = {d, n: 0, h: 0, x: 0}); t.n++; t.h += d.hDesc; t.x += d.hExt;
@@ -657,14 +657,14 @@ function armarXlsx() {
     i === 6 ? cF(i, tot, `SUBTOTAL(109,G5:G${ult})`, tX, 11) : cS(i, tot, "", 10)).join("") + `</row>`;
   const h1 = hojaXml(f, W, 4, `A4:${U}${ult}`, [`A1:${U}1`, `A2:${U}2`]);
   /* Hoja 2: resumen por trabajador */
-  const H2 = ["Trabajador","SAP","Sindicato","Registros","Horas","Extras","Total h"], l = Object.values(res).sort((p, q) => (q.h + q.x) - (p.h + p.x));
+  const H2 = ["Trabajador","SAP","Sindicato","Registros","Trabajo en descanso (h)","Horas extras (h)","Total (h)"], l = Object.values(res).sort((p, q) => (q.h + q.x) - (p.h + p.x));
   let g = `<row r="1" ht="28" customHeight="1">${cS(0, 1, "RESUMEN POR TRABAJADOR · " + per.toUpperCase(), 1)}</row><row r="2">${cS(0, 2, sub, 2)}</row>
-<row r="4" ht="26" customHeight="1">${H2.map((h, i) => cS(i, 4, h, 3)).join("")}</row>`;
+<row r="4" ht="32" customHeight="1">${H2.map((h, i) => cS(i, 4, h, 3)).join("")}</row>`;
   l.forEach((t, i) => { const n = 5 + i, z = i % 2, C = 8 + z;
     g += `<row r="${n}" ht="18" customHeight="1">` + cS(0, n, t.d.ape + ", " + t.d.nom, 4 + z) + cA(1, n, t.d.sap, C) + cS(2, n, t.d.sind, C) + cN(3, n, t.n, C) + cN(4, n, t.h, C) + cN(5, n, t.x, C) + cF(6, n, `E${n}+F${n}`, t.h + t.x, C) + `</row>`; });
   const u2 = 4 + l.length, t2 = u2 + 1;
   g += `<row r="${t2}" ht="20" customHeight="1">` + cS(0, t2, "TOTAL", 10) + cS(1, t2, "", 10) + cS(2, t2, "", 10) + [[3, a.length], [4, tD], [5, tX], [6, tD + tX]].map(([c, v]) => cF(c, t2, `SUM(${col(c)}5:${col(c)}${u2})`, v, 11)).join("") + `</row>`;
-  const h2 = hojaXml(g, [34, 10, 12, 11, 10, 10, 10], 4, "", ["A1:G1", "A2:G2"]);
+  const h2 = hojaXml(g, [34, 10, 12, 11, 13, 11, 10], 4, "", ["A1:G1", "A2:G2"]);
   const R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships", P = "http://schemas.openxmlformats.org/package/2006";
   return {nombre: `Sobretiempo_${per.replace(/ /g, "_")}.xlsx`, n: a.length, partes: zip([
     ["[Content_Types].xml", XMLH + `<Types xmlns="${P}/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`],
